@@ -4,13 +4,15 @@
 
 public class List_inChainOfNodes{
     private Node headSentinel;
+    private Node backSentinel;
 
      
     /**
       Construct an empty list
      */
     public List_inChainOfNodes() {
-        headSentinel = new Node( null, null);
+        headSentinel = new Node( null, null, null);
+        backSentinel = headSentinel;
     }
 
     /**
@@ -34,15 +36,15 @@ public class List_inChainOfNodes{
        format:
            # elements [element0,element1,element2,]
       */
-    public String toString() {
-        String stringRep = size() + " elements [";
+    // public String toString() {
+        // String stringRep = size() + " elements [";
 
-        for( Node node = headSentinel.getNextNode()
-           ; node != null
-           ; node = node.getNextNode() )
-            stringRep += node.getCargo() + ",";
-        return stringRep + "]";
-    }
+        // for( Node node = headSentinel.getNextNode()
+           // ; node != null
+           // ; node = node.getNextNode() )
+            // stringRep += node.getCargo() + ",";
+        // return stringRep + "]";
+    // }
 
 
     /**
@@ -54,6 +56,12 @@ public class List_inChainOfNodes{
         headSentinel.setNextNode(
           new Node( val, headSentinel.getNextNode()));
         return true;
+     }
+     
+     public boolean addAsBack( Object val) {
+         backSentinel.setPreviousNode(
+            new Node( val, backSentinel.getPreviousNode()));
+            return true;
      }
 
 
@@ -69,9 +77,19 @@ public class List_inChainOfNodes{
         int upTo;  // comma operator precludes declaration in FOR
         for( upTo = 0   , node = headSentinel
            ; upTo < index
-           ; upTo++     , node = node.getNextNode()
+           ; upTo ++     , node = node.getNextNode()
            )
            ;  // null loop body since all the action is in the FOR
+        return node;
+    }
+    
+    private Node getNodeAfter (int index) {
+        Node node;
+        int upTo;
+        for (upTo = size() + 1, node = backSentinel;
+             upTo > index;
+             upTo -- , node = node.getPreviousNode()
+             );
         return node;
     }
 
@@ -81,6 +99,10 @@ public class List_inChainOfNodes{
      */
     private Node getNode( int index) {
         return getNodeBefore( index).getNextNode();
+    }
+    
+    private Node getNodeBackward( int index) {
+        return getNodeAfter( index).getPreviousNode();
     }
 
     // accessors
@@ -92,7 +114,7 @@ public class List_inChainOfNodes{
            whether user violated the condition.)
      */
     public Object get( int index ) {
-        return getNode( index).getCargo();
+        return getNodeBackward( index).getCargo();
     }
 
 
@@ -102,10 +124,13 @@ public class List_inChainOfNodes{
       @return old value at @index
       @precondition: @index is within the bounds of this list.
      */
+    // public Object set( int index, Object newValue ) {
+        // return getNode( index).setCargo( newValue);
+    // }
+    
     public Object set( int index, Object newValue ) {
-        return getNode( index).setCargo( newValue);
+        return getNodeBackward( index).setCargo( newValue);
     }
-
 
     /**
       Insert @value at position @index in this list.
@@ -133,10 +158,32 @@ public class List_inChainOfNodes{
       @return the value that was removed from the list
      */
     public Object remove( int index) {
-        Node before = getNodeBefore( index);
-        Node ax = before.getNextNode();
+        Node after = getNodeAfter( index);
+        Node ax = after.getPreviousNode();
         Object saveForReturn = ax.getCargo();
-        before.setNextNode( ax.getNextNode());
+        after.setPreviousNode( ax.getPreviousNode());
         return saveForReturn;
     }
+    
+        /**
+      Demo use of links to previous Nodes.
+
+      @return a string representation of this list,
+              iterating through the list
+              from tail to head.
+      format, using ` as separator
+          [element0`element1`element2`]
+     */
+    public String toString() {
+        String stringRep = "tail-first [";
+
+        for( Node node =
+                 backSentinel;
+                 node != null;
+                 node = node.getPreviousNode()
+           )
+            stringRep += node.getCargo() + "`";
+        return stringRep + "]";
+    }
+    
 }
